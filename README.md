@@ -12,6 +12,10 @@ work, due to breaking changes. I'll address this... at some point... if needed.
 You'll also need a understanding of the ECS architecture, but if you're here
 you probably do.
 
+Finally, you'll need a tolerance for breaking changes, which will probably
+come as soon as this gets used at all. Still deciding how I want to 
+package/namespace the module, for example.
+
 ## Install
 Nothing special yet, just copy and paste the `love` directory into your
 project.
@@ -167,5 +171,247 @@ euid	1	position	0	99.9
 euid	2	position	50	50
 ```
 
-Notice the second box (`euid` `2`) is not effected by the Gravity System,
+Notice the second box (`euid: 2`) is not effected by the Gravity System,
 because our `box_2` had no `Physics` Component.
+
+## Reference
+### ecs.World
+Instance properties of a `ecs.World.init()`.
+
+property                               | description
+-------------------------------------- | ---
+`world.ctx`                                  | A context property to store your arbitrary data outside the scope of your entity components; so it can be accessed in your Systems, for example. I've used it to hold on to sprite sheets in the past.
+`world.add_system(system, on)`               | Adds the system to the world. `on` ("update" or "draw") determines when the `System.run` function is called. System is added for the next tick.
+`world.add_entity(entity)`                   | Adds the entity to the world. Takes effect on next tick.
+`world.add_entities(entities)`               | Convenience for adding multiple entities to the world at once. Takes effect on next tick.
+`world.remove_entity(uid)`                   | Removes the entity from the world. Takes effect on next tick.
+`world.add_component(entity_uid, component)` | Adds a component to an existing entity. Takes effect on next tick.
+`world.entities`                             | All entities in the world, keyed by their entity uid. Treat as read-only, use `add_entity` to add new entities.
+`world.children(entity_uid)`                 | A list of their immediate children. Add a parent-child relationship by adding a `ecs.Components.Parent` to your entity.
+`world:update(dt)`                           | Progress the simulation by the given delta time value. Indirectly calls all registered "update" Systems.
+`world:draw()`                               | Indirectly calls all "draw" registered Systems that _do not_ progress the simulation, but _are_ responsible for rendering.
+
+### System Filters
+A bit more documentation on the options you have defining your `System.filter`
+predicates.
+
+These predicate conditions can be composed to create filters
+on the entities that will be handed into your Systems.
+
+#### Predicates
+Under the `ecs` object. Here's what's available:
+
+name | description
+--- | ---
+`ecs.And` | All contained predicates or entities must be met.
+`ecs.Or` | Any of the contained predicates or entities must be met.
+`ecs.Required` | Makes contained predicate or entities required.
+`ecs.Optional` | Makes contained predicate or entities optional.
+
+#### Groups
+On top of defining a single filter, it's also possible to define
+multiple filters, if your System, for example, wants access to
+two or more distinct lists of entities (maybe bullets and targets).
+
+To provide multiple filters, key the `System.filter` with the names
+of the groups you want to receive. The will be available as their
+group name under the passed `entities` argument to your System.
+
+See some examples below.
+
+#### Examples
+```lua
+Shooting = {}
+
+Shooting.filter = {
+    targets=And{"hitbox", "position", "health"},
+    bullets=And{"hitbox", "position", "bullet"},
+}
+
+function Shooting.run(world, entities, dt)
+    for tuid, target_entity in pairs(entities.targets) do
+        for buid, bullet_entity in pairs(entities.bullets) do
+            if is_colliding(world, target_entity, bullet_entity) then
+                target_entity.health.current = target_entity.health.current - 1
+
+                if target_entity.health.current == 0 then
+                    world.remove_entity(tuid)
+                end
+            end
+        end
+    end
+end
+
+world.add_system(Shooting, "update")
+```
+
+```lua
+Rendering = {}
+
+Rendering.filter = And{
+    Or{"sprite", "rectangle"},
+    Optional("position"),
+    Optional("scale"),
+    Optional("rotation"),
+    Optional("zindex"),
+    Optional("parent"),
+    Optional("color")
+}
+
+local DEFAULT_COLOR = {red=1, green=1, blue=1, alpha=1}
+
+local function zcompare(a, b)
+    local left = a.zindex or {index=0}
+    local right = b.zindex or {index=0}
+    return left.index > right.index
+end
+
+function Rendering.run(world, entities)
+    entities = table.values(entities)  -- prepare for sorting (looses uids)
+    table.sort(entities, zcompare)
+
+    for _, entity in pairs(entities) do
+        local position = world_position(world, entity)
+        local rotation = world_rotation(world, entity)
+        local scale = world_scale(world, entity)
+        local color = entity.color or DEFAULT_COLOR
+
+        love.graphics.setColor(color.red, color.green, color.blue, color.alpha)
+
+        -- draw sprite
+        if entity.sprite ~= nil then
+            love.graphics.draw(
+                entity.sprite.image,
+                entity.sprite.quad,
+                position.x,
+                position.y,
+                math.rad(rotation.degrees),
+                scale.fraction * entity.sprite.scale,
+                scale.fraction * entity.sprite.scale,
+                entity.sprite.width/2,
+                entity.sprite.height/2
+            )
+
+        -- draw rectangle
+        elseif entity.rectangle ~= nil then
+            local mode = entity.rectangle.mode
+            local width = entity.rectangle.width * scale.fraction
+            local height = entity.rectangle.height * scale.fraction
+            local rx = entity.rectangle.rx
+            local ry = entity.rectangle.ry
+            love.graphics.push()
+            love.graphics.translate(position.x, position.y)
+            love.graphics.rotate(math.rad(rotation.degrees))
+            love.graphics.rectangle(mode, -width/2, -height/2, width, height, rx, ry)
+            love.graphics.pop()
+
+        else
+            assert(false, "unhandled entity")
+        end
+    end
+end
+
+world.add_system(Rendering, "draw")
+```
+
+### Parent Component
+The `ecs.Component.Parent` is currently the only bundled component with
+Love ECS. Love ECS will look for this Component on entities it encounters
+and will use it to drive the `world.children(entity_uid)` which can be useful
+to access in your Systems.
+
+Associating Entities with other Entities in a parent-child hierarchy can be
+useful for modeling things such as power ups, where a power up might have many
+components that each augment the player when collected. Those augments can
+be all stored as children of a power up and transferred to the player on 
+pick up.
+
+```lua
+-- Spawns a power up
+Spawning = {}
+
+Spawning.filter = {
+    power_ups=Required("power_up"),
+}
+
+function Spawning.run(world, entities, dt)
+    for _, _ in pairs(entities.power_ups) do
+        -- skip if already a buff out there
+        return
+    end
+
+    -- create power up in random position
+    local x = math.random(32, 32*15)
+    local y = math.random(32, 32*15)
+    local duration = math.random(5, 10)
+    local buff_uid = world.add_entity({
+        Rectangle("fill", 20, 20, 10, 10),
+        Hitbox{shape="circle", radius=12},
+        Color(255, 0, 0, 1),
+        Position(x, y),
+        Buff(duration),
+        ZIndex(1)
+    })
+
+    -- add effects to the pick up
+    local speed = math.random(100, 300)
+    local _ = world.add_entity({
+        Parent(buff_uid),
+        Speed(speed),
+        Rectangle("line", 20, 20, 10, 10),
+        Color(255, 0, 0, 1),
+        ZIndex(-1)
+    })
+
+    -- Apply a effect to the player so they know their powered up
+    local _ = world.add_entity({
+        Parent(buff_uid),
+        Rectangle("line", 20, 20, 10, 10),
+        Color(255, 0, 0, 1),
+        ZIndex(-1)
+    })
+
+    -- Add a speed augment to this power up of random amount
+    local speed = math.random(100, 300)
+    local _ = world.add_entity({
+        Parent(buff_uid),
+        Speed(speed)
+    })
+
+    -- Add a power augment to this power up of random amount
+    local attack_power = math.random(0, 100)
+    local _ = world.add_entity({
+        Parent(buff_uid),
+        AttackPower(power)
+    })
+end
+
+PoweringUp = {}
+
+PoweringUp.filter = {
+    buffable=And{"hitbox", "position", "buffable"},
+    power_up=And{"hitbox", "position", "power_up"},
+}
+
+function PoweringUp.run(world, entities, dt)
+    for euid, buffable_entity in pairs(entities.buffable) do
+        for cuid, power_up_entity in pairs(entities.power_up) do
+            if is_colliding(world, buffable_entity, power_up_entity) then
+                -- remove pickup
+                world.remove_entity(cuid)
+                -- transfer associated buff components
+                for iuid, buff in pairs(world.children(cuid)) do
+                    -- Movement and Attack Systems can now 
+                    -- augment speed and damage based on the
+                    -- associated power up.
+                    buff.parent.uid = euid
+                    -- Only temporary powers. 
+                    -- Schedule for deletion after duration
+                    world.add_component(iuid, Delete(power_up_entity.buff.duration))
+                end
+            end
+        end
+    end
+end
+
+```
