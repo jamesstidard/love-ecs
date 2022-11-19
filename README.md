@@ -328,11 +328,11 @@ pick up.
 Spawning = {}
 
 Spawning.filter = {
-    power_ups=Required("power_up"),
+    buffs=Required("buff"),
 }
 
 function Spawning.run(world, entities, dt)
-    for _, _ in pairs(entities.power_ups) do
+    for _, _ in pairs(entities.buffs) do
         -- skip if already a buff out there
         return
     end
@@ -366,24 +366,24 @@ function Spawning.run(world, entities, dt)
     })
 
     -- Add a power augment to this power up of random amount
-    local attack_power = math.random(0, 100)
+    local power = math.random(0, 100)
     local _ = world.add_entity({
         Parent(buff_uid),
         AttackPower(power)
     })
 end
 
-PoweringUp = {}
+Buffing = {}
 
-PoweringUp.filter = {
+Buffing.filter = {
     buffable=And{"hitbox", "position", "buffable"},
-    power_up=And{"hitbox", "position", "power_up"},
+    buffs=And{"hitbox", "position", "buff"},
 }
 
-function PoweringUp.run(world, entities, dt)
+function Buffing.run(world, entities, dt)
     for euid, buffable_entity in pairs(entities.buffable) do
-        for cuid, power_up_entity in pairs(entities.power_up) do
-            if is_colliding(world, buffable_entity, power_up_entity) then
+        for cuid, buff_entity in pairs(entities.buffs) do
+            if is_colliding(world, buffable_entity, buff_entity) then
                 -- remove pickup
                 world.remove_entity(cuid)
                 -- transfer associated buff components
@@ -394,7 +394,7 @@ function PoweringUp.run(world, entities, dt)
                     buff.parent.uid = euid
                     -- Only temporary powers. 
                     -- Schedule for deletion after duration
-                    world.add_component(iuid, Delete(power_up_entity.buff.duration))
+                    world.add_component(iuid, Delete(buff_entity.buff.duration))
                 end
             end
         end
