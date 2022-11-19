@@ -346,7 +346,7 @@ function Spawning.run(world, entities, dt)
         Hitbox{shape="circle", radius=12},
         Color(255, 0, 0, 1),
         Position(x, y),
-        Buff(duration),
+        PowerUp(duration),
         ZIndex(1)
     })
 
@@ -404,7 +404,7 @@ function PoweringUp.run(world, entities, dt)
                     buff.parent.uid = euid
                     -- Only temporary powers. 
                     -- Schedule for deletion after duration
-                    world.add_component(iuid, Delete(power_up_entity.buff.duration))
+                    world.add_component(iuid, Delete(power_up_entity.power_up.duration))
                 end
             end
         end
