@@ -116,6 +116,13 @@ function World.init()
         return uid
     end
 
+    local function remove_system(uid)
+        table.insert(promised_changes, prime(table.keydelete, {systems, uid}))
+        for _, type_systems in pairs(type_system) do
+            table.insert(promised_changes, prime(table.remove, {type_systems, uid}))
+        end
+    end
+
     local function add_entity(entity)
         local uid = next_uid()
         local _entity = {}
@@ -155,11 +162,13 @@ function World.init()
     return {
         ctx={},
         add_system=add_system,
+        remove_system=remove_system,
         add_entity=add_entity,
         add_entities=add_entities,
         remove_entity=remove_entity,
         add_component=add_component,
         entities=entities,
+        systems=systems,
         children=children,
         update=update,
         draw=draw,
