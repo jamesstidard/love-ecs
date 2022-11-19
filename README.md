@@ -21,8 +21,8 @@ Nothing special yet, just copy and paste the `love` directory into your
 project.
 
 ## Quick Start
-Everything you need is on a the returned variable from the `love/ecs.lua`
-file, which isn't much.
+Everything you need is on the returned variable from the `love/ecs.lua`
+file.
 
 ```lua
 local ecs = require("love.ecs")
