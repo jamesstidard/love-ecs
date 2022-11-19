@@ -380,6 +380,31 @@ function Or(requirements)
 end
 
 
+function Xor(requirements)
+    local function evaluate(entity)
+        local pass = false
+        for _, requirement in pairs(requirements) do
+            local current = eval(requirement, entity)
+            if not pass and current then
+                pass = true
+            elseif pass and current then
+                return false
+            end
+        end
+        return pass
+    end
+    return evaluate
+end
+
+
+function Not(requirements)
+    local function evaluate(entity)
+        return not eval(requirements, entity)
+    end
+    return evaluate
+end
+
+
 function Required(requirements)
     local function evaluate(entity)
         return eval(requirements, entity)

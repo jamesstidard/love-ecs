@@ -202,10 +202,12 @@ Under the `ecs` object. Here's what's available:
 
 name | description
 --- | ---
-`ecs.And` | All contained predicates or entities must be met.
-`ecs.Or` | Any of the contained predicates or entities must be met.
-`ecs.Required` | Makes contained predicate or entities required.
-`ecs.Optional` | Makes contained predicate or entities optional.
+`ecs.And` | All contained predicates or components must be met.
+`ecs.Or` | Any of the contained predicates or components must be met.
+`ecs.Xor` | One, and only one, of the contained predicates or components must be met.
+`ecs.Not` | Inverts the truthiness of the contained predicate or component.
+`ecs.Required` | Makes contained predicate or components required.
+`ecs.Optional` | Makes contained predicate or components optional.
 
 #### Groups
 On top of defining a single filter, it's also possible to define

@@ -1,4 +1,6 @@
 - [x] complete world functions e.g. world:remove_system()
-- [ ] Expand filter options e.g. XOR
+- [x] Expand filter options e.g. XOR
+- [ ] Figure out name spacing and importing
+- [ ] package and deploy
 - [ ] Networking
 - [ ] hooks for developer to register to things like 'on_entity_add' etc. Maybe can be a system using `world.add_system(entity_added_handler, "entity_added")`
