@@ -250,7 +250,7 @@ world.add_system(Shooting, "update")
 Rendering = {}
 
 Rendering.filter = And{
-    Or{"sprite", "rectangle"},
+    Xor{"sprite", "rectangle"},
     Optional("position"),
     Optional("scale"),
     Optional("rotation"),
