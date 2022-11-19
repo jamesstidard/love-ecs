@@ -350,16 +350,6 @@ function Spawning.run(world, entities, dt)
         ZIndex(1)
     })
 
-    -- add effects to the pick up
-    local speed = math.random(100, 300)
-    local _ = world.add_entity({
-        Parent(buff_uid),
-        Speed(speed),
-        Rectangle("line", 20, 20, 10, 10),
-        Color(255, 0, 0, 1),
-        ZIndex(-1)
-    })
-
     -- Apply a effect to the player so they know their powered up
     local _ = world.add_entity({
         Parent(buff_uid),
