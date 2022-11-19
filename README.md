@@ -30,11 +30,9 @@ local ecs = require("love.ecs")
 
 ### World Initialisation
 Everything revolves around `ecs.World`. Initiate your world, and then
-add your Systems and Entities to it.
+add your Systems and Entities to it. Let's initiate our world:
 
 ```lua
-local ecs = require("love.ecs")
-
 local world = ecs.World.init()
 ```
 
@@ -47,8 +45,7 @@ One of these attributes must be a unique `name` of the Component,
 Love ECS uses this to identify Components on a Entity. Systems will also
 use this name to register what Component they interact with.
 
-For example, here are some Components you might define to capture a 
-on-screen rectangle:
+For example, lets define some Components you might define to capture some on-screen boxes:
 
 ```lua
 function Rectangle(width, height)
