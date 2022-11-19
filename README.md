@@ -21,8 +21,8 @@ Nothing special yet, just copy and paste the `love` directory into your
 project.
 
 ## Quick Start
-Everything you need is on a the returned variable from the `love/ecs.lua`
-file, which isn't much.
+Everything you need is on the returned variable from the `love/ecs.lua`
+file.
 
 ```lua
 local ecs = require("love.ecs")
@@ -30,11 +30,9 @@ local ecs = require("love.ecs")
 
 ### World Initialisation
 Everything revolves around `ecs.World`. Initiate your world, and then
-add your Systems and Entities to it.
+add your Systems and Entities to it. Let's initiate our world:
 
 ```lua
-local ecs = require("love.ecs")
-
 local world = ecs.World.init()
 ```
 
@@ -47,8 +45,7 @@ One of these attributes must be a unique `name` of the Component,
 Love ECS uses this to identify Components on a Entity. Systems will also
 use this name to register what Component they interact with.
 
-For example, here are some Components you might define to capture a 
-on-screen rectangle:
+For example, lets define some Components you might define to capture some on-screen boxes:
 
 ```lua
 function Rectangle(width, height)
@@ -331,11 +328,11 @@ pick up.
 Spawning = {}
 
 Spawning.filter = {
-    power_ups=Required("power_up"),
+    buffs=Required("buff"),
 }
 
 function Spawning.run(world, entities, dt)
-    for _, _ in pairs(entities.power_ups) do
+    for _, _ in pairs(entities.buffs) do
         -- skip if already a buff out there
         return
     end
@@ -351,16 +348,6 @@ function Spawning.run(world, entities, dt)
         Position(x, y),
         Buff(duration),
         ZIndex(1)
-    })
-
-    -- add effects to the pick up
-    local speed = math.random(100, 300)
-    local _ = world.add_entity({
-        Parent(buff_uid),
-        Speed(speed),
-        Rectangle("line", 20, 20, 10, 10),
-        Color(255, 0, 0, 1),
-        ZIndex(-1)
     })
 
     -- Apply a effect to the player so they know their powered up
@@ -379,24 +366,24 @@ function Spawning.run(world, entities, dt)
     })
 
     -- Add a power augment to this power up of random amount
-    local attack_power = math.random(0, 100)
+    local power = math.random(0, 100)
     local _ = world.add_entity({
         Parent(buff_uid),
         AttackPower(power)
     })
 end
 
-PoweringUp = {}
+Buffing = {}
 
-PoweringUp.filter = {
+Buffing.filter = {
     buffable=And{"hitbox", "position", "buffable"},
-    power_up=And{"hitbox", "position", "power_up"},
+    buffs=And{"hitbox", "position", "buff"},
 }
 
-function PoweringUp.run(world, entities, dt)
+function Buffing.run(world, entities, dt)
     for euid, buffable_entity in pairs(entities.buffable) do
-        for cuid, power_up_entity in pairs(entities.power_up) do
-            if is_colliding(world, buffable_entity, power_up_entity) then
+        for cuid, buff_entity in pairs(entities.buffs) do
+            if is_colliding(world, buffable_entity, buff_entity) then
                 -- remove pickup
                 world.remove_entity(cuid)
                 -- transfer associated buff components
@@ -407,7 +394,7 @@ function PoweringUp.run(world, entities, dt)
                     buff.parent.uid = euid
                     -- Only temporary powers. 
                     -- Schedule for deletion after duration
-                    world.add_component(iuid, Delete(power_up_entity.buff.duration))
+                    world.add_component(iuid, Delete(buff_entity.buff.duration))
                 end
             end
         end
