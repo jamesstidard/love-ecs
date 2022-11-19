@@ -93,7 +93,7 @@ world.add_entity(box_2)
 ```
 
 ### Systems
-Now we have some Entities, we want to define out Systems. Lets
+Now we have some Entities, we want to define our Systems. Lets
 make a `Gravity` System to interact with our Entities.
 
 A System is comprised of a `System.run` function, which will be called
@@ -179,7 +179,7 @@ property                               | description
 -------------------------------------- | ---
 `world.ctx`                                  | A context property to store your arbitrary data outside the scope of your entity components; so it can be accessed in your Systems, for example. I've used it to hold on to sprite sheets in the past.
 `world.add_system(system, on)`               | Adds the system to the world. `on` ("update" or "draw") determines when the `System.run` function is called. System is added for the next tick. Returns the system `uid`.
-`world.remove_entity(uid)`                   | Removes the system from the world. Takes effect on next tick.
+`world.remove_system(uid)`                   | Removes the system from the world. Takes effect on next tick.
 `world.add_entity(entity)`                   | Adds the entity to the world. Takes effect on next tick. Returns the entities `uid`.
 `world.add_entities(entities)`               | Convenience for adding multiple entities to the world at once. Takes effect on next tick. Returns a list of entity `uids` in the same order as passed list.
 `world.remove_entity(uid)`                   | Removes the entity from the world. Takes effect on next tick.
