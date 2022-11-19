@@ -1,3 +1,4 @@
 - [ ] complete world functions e.g. world:remove_system()
 - [ ] Expand filter options e.g. XOR
 - [ ] Networking
+- [ ] hooks for developer to register to things like 'on_entity_add' etc.
