@@ -1,0 +1,3 @@
+- [ ] complete world functions e.g. world:remove_system()
+- [ ] Expand filter options e.g. XOR
+- [ ] Networking
