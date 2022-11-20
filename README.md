@@ -406,3 +406,14 @@ function Buffing.run(world, entities, dt)
 end
 
 ```
+
+## Example
+The projects repository has a example "game" written with 
+[LÖVE](https://love2d.org).
+
+If you have `love` installed the project can be run from the
+root directory with:
+
+```bash
+$ love example
+```
