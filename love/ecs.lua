@@ -1,16 +1,21 @@
-local function associate_system_entities(systems, entities)
+local HERE = (...):match("(.-)[^%.]+$") -- relative import hack
+local utils = require(HERE.."utils")
+
+local Public, Private = {}, {}
+
+
+function Private.associate_system_entities(systems, entities)
     local association = {}
     for suid, system in pairs(systems) do
         local matches = {}
         if system.filter == nil then
-            matches["uids"] = table.keys(entities)
+            matches["uids"] = utils.keys(entities)
         elseif type(system.filter) == "function" then
-            matches["uids"] = table.keys(table.filter(entities, system.filter))
+            matches["uids"] = utils.keys(utils.filter(entities, system.filter))
         elseif type(system.filter) == "table" then
-            -- todo: multiple filters handed into systems in groups
             matches["groups"] = {}
             for group, filter in pairs(system.filter) do
-                matches["groups"][group] = table.keys(table.filter(entities, filter))
+                matches["groups"][group] = utils.keys(utils.filter(entities, filter))
             end
         else
             assert(false, "unhandled")
@@ -22,7 +27,7 @@ local function associate_system_entities(systems, entities)
 end
 
 
-local function associate_entity_children(entities)
+function Private.associate_entity_children(entities)
     local children = {}
 
     for euid, entity in pairs(entities) do
@@ -41,10 +46,8 @@ local function associate_entity_children(entities)
 end
 
 
-World = {}
-
-function World.init()
-    local next_uid = counter()
+function Public.World()
+    local next_uid = utils.counter()
     local entities = {}
     local systems = {}
 
@@ -68,8 +71,8 @@ function World.init()
             promised_changes = {}
 
             -- update cached state
-            system_entities = associate_system_entities(systems, entities)
-            _entity_children = associate_entity_children(entities)
+            system_entities = Private.associate_system_entities(systems, entities)
+            _entity_children = Private.associate_entity_children(entities)
         end
     end
 
@@ -109,17 +112,17 @@ function World.init()
     end
 
     local function add_system(system, on)
-        assert(table.contains(on, {"update", "draw"}), "on must be 'update' or 'draw'")
+        assert(utils.contains(on, {"update", "draw"}), "on must be 'update' or 'draw'")
         local uid = next_uid()
-        table.insert(promised_changes, prime(table.keyinsert, {systems, uid, system}))
-        table.insert(promised_changes, prime(table.insert, {type_system[on], uid}))
+        table.insert(promised_changes, utils.prime(utils.keyinsert, {systems, uid, system}))
+        table.insert(promised_changes, utils.prime(table.insert, {type_system[on], uid}))
         return uid
     end
 
     local function remove_system(uid)
-        table.insert(promised_changes, prime(table.keydelete, {systems, uid}))
+        table.insert(promised_changes, utils.prime(utils.keydelete, {systems, uid}))
         for _, type_systems in pairs(type_system) do
-            table.insert(promised_changes, prime(table.remove, {type_systems, uid}))
+            table.insert(promised_changes, utils.prime(table.remove, {type_systems, uid}))
         end
     end
 
@@ -129,7 +132,7 @@ function World.init()
         for _, component in pairs(entity) do
             _entity[component.name] = component
         end
-        table.insert(promised_changes, prime(table.keyinsert, {entities, uid, _entity}))
+        table.insert(promised_changes, utils.prime(utils.keyinsert, {entities, uid, _entity}))
         return uid
     end
 
@@ -143,12 +146,12 @@ function World.init()
     end
 
     local function remove_entity(uid)
-        table.insert(promised_changes, prime(table.keydelete, {entities, uid}))
+        table.insert(promised_changes, utils.prime(utils.keydelete, {entities, uid}))
     end
 
     local function add_component(entity_uid, component)
         local entity = entities[entity_uid]
-        table.insert(promised_changes, prime(table.keyinsert, {entity, component.name, component}))
+        table.insert(promised_changes, utils.prime(utils.keyinsert, {entity, component.name, component}))
     end
 
     local function children(uid)
@@ -176,176 +179,7 @@ function World.init()
 end
 
 
-
-function table.extend(list, values)
-    for _, v in pairs(values) do
-        table.insert(list, v)
-    end
-end
-
-
-function table.contains(value, table)
-    for _, element in pairs(table) do
-        if value == element then
-            return true
-        end
-    end
-    return false
-end
-
-
-function table.nextlowest(list)
-    -- finds next lowest possible index to insert into a list
-    -- so if index 1 gets removed, but index 2, 3, etc exist
-    -- 1 will be returned.
-    local index = 1
-    while true do
-        if list[index] == nil then
-            return index
-        end
-        index = index + 1
-    end
-end
-
-
-function table.sorted(list, fn)
-    local copy = table.copy(list)
-    table.sort(copy, fn)
-    return copy
-end
-
-
-function table.copy(original)
-    local copy = {}
-    for key, value in pairs(original) do
-        copy[key] = value
-    end
-    return copy
-end
-
-
-function table.deepcopy(original)
-    local orig_type = type(original)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, original, nil do
-            copy[table.deepcopy(orig_key)] = table.deepcopy(orig_value)
-        end
-        setmetatable(copy, table.deepcopy(getmetatable(original)))
-    else -- number, string, boolean, etc
-        copy = original
-    end
-    return copy
-end
-
-
-function table.keys(list)
-    local keys = {}
-    for k, _ in pairs(list) do
-        table.insert(keys, k)
-    end
-    return keys
-end
-
-
-function table.values(list)
-    local arr = {}
-    for _, v in pairs(list) do
-        table.insert(arr, v)
-    end
-    return arr
-end
-
-
-function table.filter(list, fn)
-    local matches = {}
-    for k, v in pairs(list) do
-        if fn(v) then
-            matches[k] = v
-        end
-    end
-    return matches
-end
-
-
-function table.keyinsert(list, name, value)
-    list[name] = value
-end
-
-
-function table.keydelete(list, name)
-    list[name] = nil
-end
-
-
-function table.map(list, fn)
-    local out = {}
-    for k, v in pairs(list) do
-        out[k] = fn(v)
-    end
-    return out
-end
-
-
-function table.zip(keys, values)
-    local out = {}
-    local len = math.min(#keys, #values)
-    local idx = 1
-    while idx <= len do
-        out[keys[idx]] = values[idx]
-        idx = idx + 1
-    end
-    return out
-end
-
-
-function table.slice(tbl, first, last, step)
-    local sliced = {}
-
-    for i = first or 1, last or #tbl, step or 1 do
-      sliced[#sliced+1] = tbl[i]
-    end
-
-    return sliced
-  end
-
-
-function table.setdeafult(list, name, value)
-    if list[name] == nil then
-        list[name] = value
-    end
-    return list[name]
-end
-
-
-function table.invert(tbl)
-    -- flips keys and values
-    local out = {}
-    for k, v in pairs(tbl) do
-        out[v] = k
-    end
-    return out
-end
-
-
-function counter()
-    local count = 0
-    return function()
-        count = count + 1
-        return count
-    end
-end
-
-
-function prime(fn, args)
-    return function()
-        fn(unpack(args))
-    end
-end
-
-
-local function eval(requirement, entity)
+function Private.eval(requirement, entity)
     if type(requirement) == "string" then
         return entity[requirement] ~= nil
     elseif type(requirement) == "function" then
@@ -356,11 +190,11 @@ local function eval(requirement, entity)
 end
 
 
-function And(requirements)
+function Public.And(requirements)
     local function evaluate(entity)
         local pass = true
         for _, requirement in pairs(requirements) do
-            pass = pass and eval(requirement, entity)
+            pass = pass and Private.eval(requirement, entity)
         end
         return pass
     end
@@ -368,11 +202,11 @@ function And(requirements)
 end
 
 
-function Or(requirements)
+function Public.Or(requirements)
     local function evaluate(entity)
         local pass = false
         for _, requirement in pairs(requirements) do
-            pass = pass or eval(requirement, entity)
+            pass = pass or Private.eval(requirement, entity)
         end
         return pass
     end
@@ -380,11 +214,11 @@ function Or(requirements)
 end
 
 
-function Xor(requirements)
+function Public.Xor(requirements)
     local function evaluate(entity)
         local pass = false
         for _, requirement in pairs(requirements) do
-            local current = eval(requirement, entity)
+            local current = Private.eval(requirement, entity)
             if not pass and current then
                 pass = true
             elseif pass and current then
@@ -397,23 +231,23 @@ function Xor(requirements)
 end
 
 
-function Not(requirements)
+function Public.Not(requirements)
     local function evaluate(entity)
-        return not eval(requirements, entity)
+        return not Private.eval(requirements, entity)
     end
     return evaluate
 end
 
 
-function Required(requirements)
+function Public.Required(requirements)
     local function evaluate(entity)
-        return eval(requirements, entity)
+        return Private.eval(requirements, entity)
     end
     return evaluate
 end
 
 
-function Optional(requirements)
+function Public.Optional(requirements)
     local function evaluate(entity)
         return true
     end
@@ -421,7 +255,7 @@ function Optional(requirements)
 end
 
 
-function Parent(uid)
+function Private.Parent(uid)
     return {
         name="parent",
         uid=uid
@@ -429,13 +263,9 @@ function Parent(uid)
 end
 
 
-return {
-    World=World,
-    And=And,
-    Or=Or,
-    Required=Required,
-    Optional=Optional,
-    Components={
-        Parent=Parent,
-    }
+Public.Components = {
+    Parent=Private.Parent,
 }
+
+
+return Public

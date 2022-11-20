@@ -1,5 +1,5 @@
 local ecs = require("love.ecs")
-local world = ecs.World.init()
+local world = ecs.World()
 
 local System = {}
 System.filter = nil

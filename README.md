@@ -33,7 +33,7 @@ Everything revolves around `ecs.World`. Initiate your world, and then
 add your Systems and Entities to it. Let's initiate our world:
 
 ```lua
-local world = ecs.World.init()
+local world = ecs.World()
 ```
 
 ### Component Definition
@@ -225,8 +225,8 @@ See some examples below.
 Shooting = {}
 
 Shooting.filter = {
-    targets=And{"hitbox", "position", "health"},
-    bullets=And{"hitbox", "position", "bullet"},
+    targets=ecs.And{"hitbox", "position", "health"},
+    bullets=ecs.And{"hitbox", "position", "bullet"},
 }
 
 function Shooting.run(world, entities, dt)
@@ -249,14 +249,14 @@ world.add_system(Shooting, "update")
 ```lua
 Rendering = {}
 
-Rendering.filter = And{
-    Xor{"sprite", "rectangle"},
-    Optional("position"),
-    Optional("scale"),
-    Optional("rotation"),
-    Optional("zindex"),
-    Optional("parent"),
-    Optional("color")
+Rendering.filter = ecs.And{
+    ecs.Xor{"sprite", "rectangle"},
+    ecs.Optional("position"),
+    ecs.Optional("scale"),
+    ecs.Optional("rotation"),
+    ecs.Optional("zindex"),
+    ecs.Optional("parent"),
+    ecs.Optional("color")
 }
 
 local DEFAULT_COLOR = {red=1, green=1, blue=1, alpha=1}
@@ -332,7 +332,7 @@ pick up.
 Spawning = {}
 
 Spawning.filter = {
-    buffs=Required("buff"),
+    buffs=ecs.Required("buff"),
 }
 
 function Spawning.run(world, entities, dt)
@@ -380,8 +380,8 @@ end
 Buffing = {}
 
 Buffing.filter = {
-    buffable=And{"hitbox", "position", "buffable"},
-    buffs=And{"hitbox", "position", "buff"},
+    buffable=ecs.And{"hitbox", "position", "buffable"},
+    buffs=ecs.And{"hitbox", "position", "buff"},
 }
 
 function Buffing.run(world, entities, dt)
