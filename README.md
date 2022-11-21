@@ -136,7 +136,7 @@ Now we have our Entities, Components, and System, we can now run the simulation.
 As hinted to above, we can advance our simulation by calling `world:update` with a `dt` 
 (delta time) since the last update.
 
-Lets just manually update it, and we'll add it into a game-loop later.
+Lets manually run a tck of the simulation:
 
 ```lua
 -- the entities we added will not be part of the world until
@@ -169,7 +169,8 @@ euid	2	position	50	50
 ```
 
 Notice the second box (`euid: 2`) is not effected by the Gravity System,
-because our `box_2` had no `Physics` Component.
+because our `box_2` had no `Physics` Component, so did not meat the `Gravity.filter`
+crteria.
 
 ## Reference
 ### ecs.World
