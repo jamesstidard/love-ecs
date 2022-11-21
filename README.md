@@ -17,7 +17,7 @@ come as soon as this gets used at all. Still deciding how I want to
 package/namespace the module, for example.
 
 ## Install
-Nothing special yet, just copy and paste the `love` directory into your
+Nothing special yet, just copy and paste the `rune` directory into your
 project.
 
 ## Quick Start
