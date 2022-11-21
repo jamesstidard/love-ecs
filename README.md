@@ -1,8 +1,8 @@
-# Love ECS
+# Rune ECS
 A modest ECS framework for lua!
 
 This as originally was built to work with the [LÖVE](https://love2d.org)
-game framework, though nothing stops Love ECS being used elsewhere.
+game framework, though nothing stops Rune ECS being used elsewhere.
 
 ## Prerequisites
 This is tested on `lua v5.1`, which is the one [LÖVE](https://love2d.org)
@@ -25,7 +25,7 @@ Everything you need is on the returned variable from the `love/ecs.lua`
 file.
 
 ```lua
-local ecs = require("love.ecs")
+local ecs = require("rune.ecs")
 ```
 
 ### World Initialisation
@@ -37,12 +37,12 @@ local world = ecs.World()
 ```
 
 ### Component Definition
-Love ECS comes with no Components, that's on you to define (with an exception
+Rune ECS comes with no Components, that's on you to define (with an exception
 for a special `ecs.Components.Parent`, covered later). A Component should take 
 a form of a function that returns a table of its attributes.
 
 One of these attributes must be a unique `name` of the Component,
-Love ECS uses this to identify Components on a Entity. Systems will also
+Rune ECS uses this to identify Components on a Entity. Systems will also
 use this name to register what Component they interact with.
 
 For example, lets define some Components you might define to capture some on-screen boxes:
@@ -317,7 +317,7 @@ world.add_system(Rendering, "draw")
 
 ### Parent Component
 The `ecs.Component.Parent` is currently the only bundled component with
-Love ECS. Love ECS will look for this Component on entities it encounters
+Rune ECS. Rune ECS will look for this Component on entities it encounters
 and will use it to drive the `world.children(entity_uid)` which can be useful
 to access in your Systems.
 

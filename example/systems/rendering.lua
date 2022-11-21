@@ -1,4 +1,4 @@
-local ecs = require("love.ecs")
+local ecs = require("rune.ecs")
 local utils = require("example.utils")
 
 

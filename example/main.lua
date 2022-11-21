@@ -6,7 +6,7 @@ if DEBUG then
     require("lldebugger").start()
 end
 
-local ecs = require("love.ecs")
+local ecs = require("rune.ecs")
 local world = nil
 
 

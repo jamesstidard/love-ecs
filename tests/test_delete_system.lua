@@ -1,4 +1,4 @@
-local ecs = require("love.ecs")
+local ecs = require("rune.ecs")
 local world = ecs.World()
 
 local System = {}
