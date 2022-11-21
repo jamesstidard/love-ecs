@@ -174,7 +174,7 @@ criteria.
 
 ## Reference
 ### ecs.World
-Instance properties of a `ecs.World.init()`.
+Instance properties of a `ecs.World()`.
 
 property                               | description
 -------------------------------------- | ---
