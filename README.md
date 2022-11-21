@@ -169,7 +169,7 @@ euid	2	position	50	50
 ```
 
 Notice the second box (`euid: 2`) is not effected by the Gravity System,
-because our `box_2` had no `Physics` Component, so did not meat the `Gravity.filter`
+because our `box_2` had no `Physics` Component, so did not meet the `Gravity.filter`
 crteria.
 
 ## Reference
