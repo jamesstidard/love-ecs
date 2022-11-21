@@ -133,7 +133,7 @@ world.add_system(Gravity, "update")
 
 ### Run the Simulation
 Now we have our Entities, Components, and System, we can now run the simulation.
-As hinted to above, we can advance our simulation by calling it with a `dt` 
+As hinted to above, we can advance our simulation by calling `world:update` with a `dt` 
 (delta time) since the last update.
 
 Lets just manually update it, and we'll add it into a game-loop later.
