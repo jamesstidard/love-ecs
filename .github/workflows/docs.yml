@@ -16,9 +16,9 @@ jobs:
           # apt install -y dirmngr gpg curl gawk
           # asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
           # asdf install nodejs latest
-          # asdf local nodejs latest
           # npm install --global yarn
           . $HOME/.asdf/asdf.sh
+          asdf local nodejs latest
           yarn install
           yarn docs:build
           rsync --progress --archive --compress --delete docs/.vuepress/dist/ /home/james/Development/www/public/rune
