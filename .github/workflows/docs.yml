@@ -20,5 +20,5 @@ jobs:
           asdf local nodejs latest
           npm install --global yarn
           yarn install
-          yarn docs:dev
+          yarn docs:build
           rsync --progress --archive --compress --delete docs/.vuepress/dist/ /home/james/Development/www/public/rune
