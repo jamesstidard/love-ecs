@@ -15,7 +15,7 @@ jobs:
           apt install -y curl git
           . $HOME/.asdf/asdf.sh
           apt install -y dirmngr gpg curl gawk
-          asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+          asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
           asdf install nodejs latest
           asdf local nodejs latest
           npm install --global yarn
