@@ -24,12 +24,12 @@ function Physics()
 end
 
 local box_1 = {
-    Rectangle{width=10, height=10},
+    Rectangle(10, 10),
     Position(0, 100),
     Physics(),
 }
 local box_2 = {
-    Rectangle{width=5, height=10},
+    Rectangle(5, 10),
     Position(50, 50),
 }
 
