@@ -1,4 +1,8 @@
-.vscode/
+.vscode
+.temp
+.cache
+node_modules
+dist
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,lua
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,lua

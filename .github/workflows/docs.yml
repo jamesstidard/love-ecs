@@ -1,0 +1,17 @@
+name: Docs Build & Deploy
+on:
+  push:
+    paths:
+      - docs/**
+      - package-lock.json
+      - .github/workflows/docs.yml
+jobs:
+  Build-And-Deploy:
+    runs-on: [self-hosted, Linux, ARM64]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: npm install --global yarn
+      - run: yarn install
+      - run: yarn docs:dev
+      - run: rsync --progress --archive --compress --delete docs/.vuepress/dist/ /home/james/Development/www/public/rune

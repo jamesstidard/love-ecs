@@ -1,0 +1,16 @@
+{
+  "name": "rune",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:jamesstidard/rune.git",
+  "author": "James Stidard <james@stidard.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "vuepress": "^2.0.0-beta.53"
+  },
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  }
+}
