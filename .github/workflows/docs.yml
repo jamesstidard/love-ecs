@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      - run: apt install nodejs
+      - run: apt install -y nodejs
+      - run: apt install -y npm
       - run: npm install --global yarn
       - run: yarn install
       - run: yarn docs:dev
