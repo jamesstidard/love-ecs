@@ -15,7 +15,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: |
-          apt-get install -y git dirmngr gpg curl gawk 2>/dev/null
+          apt-get install -y git dirmngr gpg curl gawk
           git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.2 2>/dev/null
           . $HOME/.asdf/asdf.sh
           asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
