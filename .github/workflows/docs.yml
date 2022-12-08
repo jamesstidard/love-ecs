@@ -15,13 +15,14 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - run: |
-          # apt install -y curl git
-          # apt install -y dirmngr gpg curl gawk
-          # asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
-          # asdf install nodejs latest
-          # npm install --global yarn
+          apt install -y curl git
+          apt install -y dirmngr gpg curl gawk
+          git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.10.2 2>/dev/null
           . $HOME/.asdf/asdf.sh
+          asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git 2>/dev/null
+          asdf install nodejs latest
           asdf local nodejs latest
+          npm install --global yarn
           yarn install
           yarn docs:build
           rsync --progress --archive --compress --delete docs/.vuepress/dist/ /home/james/Development/www/public/rune
