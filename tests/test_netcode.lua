@@ -79,6 +79,9 @@ local schema = {
 
 
 
+local function is_variadic(item)
+    return item["variadic"]
+end
 
 
 local function validate_action(path, action)
@@ -86,7 +89,7 @@ local function validate_action(path, action)
 
     local provided = utils.keys(action)
     local required = {"name", "implemented_by"}
-    local defaults = {description="", arguments={}, returns={}}
+    local defaults = {description="", authenticated=true, arguments={}, returns={}}
     local optional = utils.keys(defaults)
 
     local missing = utils.difference(required, provided)
@@ -102,19 +105,23 @@ local function validate_action(path, action)
         end
     end
 
-    assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'")
+    assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'.")
     assert(utils.isarray(action["arguments"]), path..".arguments must be array, not table; deterministic order is important for optimising packet size.")
     assert(utils.isarray(action["returns"]), path..".returns must be array, not table; deterministic order is important for optimising packet size.")
 
     for index, argument in ipairs(action["arguments"]) do
         validate_argument(path..".arguments."..index, argument)
     end
-    -- TODO: only last argument is variadic and only one of them.
+    local variadics = utils.filter(action["arguments"], is_variadic)
+    assert(#variadics <= 1, path..".arguments can only have single variadic argument.")
+    assert(#variadics == 0 or is_variadic(action["arguments"][-1]), path.." variadic argument must be last.")
 
     for index, return_ in ipairs(action["returns"]) do
         validate_returns(path..".returns."..index, return_)
     end
-    -- TODO: only last returns is variadic and only one of them.
+    variadics = utils.filter(action["returns"], is_variadic)
+    assert(#variadics <= 1, path..".returns can only have single variadic return.")
+    assert(#variadics == 0 or is_variadic(action["returns"][-1]), path.." variadic return must be last.")
 end
 
 
