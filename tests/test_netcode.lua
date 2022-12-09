@@ -1,6 +1,6 @@
 local utils = require("rune.utils")
 
-local KEYS = {"W", "A", "S", "D"}
+local KEYS = {"W_DOWN", "W_UP", "A_DOWN", "A_UP", "S_DOWN", "S_UP", "D_DOWN", "D_UP"}
 local PLAYERS = {1, 2, 3, 4, 5, 6, 7, 8}
 
 local schema = {
