@@ -168,4 +168,44 @@ function Public.prime(fn, args)
     end
 end
 
+
+function Public.isarray(t)
+    local i = 0
+    for _ in pairs(t) do
+        i = i + 1
+        if t[i] == nil then return false end
+    end
+    return true
+end
+
+
+function Public.union(a, b)
+    -- all values in both a and b combined
+    -- i.e. set(a) | set(b)
+    local values = {}
+    for _, value in ipairs(a) do
+        table.insert(value)
+    end
+    for _, value in ipairs(b) do
+        if not Public.contains(value, values) then
+            table.insert(value)
+        end
+    end
+    return values
+end
+
+
+function Public.difference(a, b)
+    -- values in a that are not in b
+    -- i.e. set(a) - set(b)
+    local values = {}
+    for _, value in ipairs(a) do
+        if not Public.contains(value, b) then
+            table.insert(value)
+        end
+    end
+    return values
+end
+
+
 return Public

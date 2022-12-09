@@ -1,40 +1,9 @@
-# Netcode
+local utils = require("rune.utils")
 
-## Client -> Server
-```
-<request id> used to throw away already processed requests
-<highest consecutive response id> used to stop peer broadcasting messages already seen. 
-<action id> what action to perform
-<arguments...> arguments for action
-<signature> message signature to prevent spoofing (probably don't need the entire hash just first x bits to prevent real-time attacks?)
-```
-
-## Server -> Client
-```
-<request id> used to throw away already processed requests
-<highest consecutive response id> used to stop peer broadcasting messages already seen. 
-<response id> the id of the request its responding to
-<return values...> return values from the action
-<signature> message signature to prevent spoofing (probably don't need the entire hash just first x bits to prevent real-time attacks?)
-```
-
-## Error responses
-...
-
-
-## Schema File
-User defined. Read by the client and server, validated handlers are given.
-
-```lua
-netcode = require("rune.netcode")
-connection = netcode.Client(schema)
-```
-
-```lua
 local KEYS = {"W", "A", "S", "D"}
 local PLAYERS = {1, 2, 3, 4, 5, 6, 7, 8}
 
-schema = {
+local schema = {
     {
         name="join",
         description="Client submission to join game.",
@@ -77,7 +46,7 @@ schema = {
             {
                 name="moves",
                 type="enum",
-                options=KEYS, 
+                options=KEYS,
                 variadic=true,
             },
         },
@@ -107,4 +76,53 @@ schema = {
         returns={},
     }
 }
-```
+
+
+
+
+
+local function validate_action(path, action)
+    assert(not utils.isarray(action), path.." must be an table, not array.")
+
+    local provided = utils.keys(action)
+    local required = {"name", "implemented_by"}
+    local defaults = {description="", arguments={}, returns={}}
+    local optional = utils.keys(defaults)
+
+    local missing = utils.difference(required, provided)
+    local unknown = utils.difference(provided, utils.union(required, optional))
+
+    assert(#missing > 0, path.." has missing keys: "..table.concat(missing, ", "))
+    assert(#unknown > 0, path.." has unknown keys: "..table.concat(unknown, ", "))
+
+    -- apply defaults
+    for key, default in pairs(defaults) do
+        if action[key] == nil then
+            action[key] = default
+        end
+    end
+
+    assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'")
+    assert(utils.isarray(action["arguments"]), path..".arguments must be array, not table; deterministic order is important for optimising packet size.")
+    assert(utils.isarray(action["returns"]), path..".returns must be array, not table; deterministic order is important for optimising packet size.")
+
+    for index, argument in ipairs(action["arguments"]) do
+        validate_argument(path..".arguments."..index, argument)
+    end
+    -- TODO: only last argument is variadic and only one of them.
+
+    for index, return_ in ipairs(action["returns"]) do
+        validate_returns(path..".returns."..index, return_)
+    end
+    -- TODO: only last returns is variadic and only one of them.
+end
+
+
+local function validate_schema(schema)
+    assert(utils.isarray(schema), "schema must be an array, not table; deterministic order is important for optimising packet size.")
+    for index, action in ipairs(schema) do
+        validate_action("schema."..index, action)
+    end
+end
+
+validate_schema(schema)
