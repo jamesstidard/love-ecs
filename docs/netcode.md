@@ -6,6 +6,7 @@
 <highest consecutive response id> used to stop peer broadcasting messages already seen. 
 <action id> what action to perform
 <arguments...> arguments for action
+<nonce> prevent replay attacks. needed if requests with ids already seen are dropped? request id might wrap though?
 <signature> message signature to prevent spoofing (probably don't need the entire hash just first x bits to prevent real-time attacks?)
 ```
 
@@ -15,6 +16,7 @@
 <highest consecutive response id> used to stop peer broadcasting messages already seen. 
 <response id> the id of the request its responding to
 <return values...> return values from the action
+<nonce> prevent replay attacks. needed if requests with ids already seen are dropped? request id might wrap though?
 <signature> message signature to prevent spoofing (probably don't need the entire hash just first x bits to prevent real-time attacks?)
 ```
 
