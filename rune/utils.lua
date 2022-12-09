@@ -8,6 +8,18 @@ function Public.extend(list, values)
 end
 
 
+function Public.merge(...)
+    -- merges tables, farthest right take presidence
+    local out = {}
+    for _, table in ipairs(...) do
+        for key, value in pairs(table) do
+            out[key] = value
+        end
+    end
+    return out
+end
+
+
 function Public.contains(value, table)
     for _, element in pairs(table) do
         if value == element then

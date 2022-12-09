@@ -1,78 +1,71 @@
 local utils = require("rune.utils")
 
+local UINT8_MIN = 0
+local UINT8_MAX = 2^8 - 1
+local UINT32_MIN = 0
+local UNIT32_MAX = 2^32 - 1
 local KEYS = {"W_DOWN", "W_UP", "A_DOWN", "A_UP", "S_DOWN", "S_UP", "D_DOWN", "D_UP"}
 local PLAYERS = {1, 2, 3, 4, 5, 6, 7, 8}
 
+
+local ROOM_ID = {
+    name="room_id",
+    type="number",
+    min=UINT8_MIN,
+    max=UINT8_MAX,
+}
+local SEED = {
+    name="seed",
+    type="number",
+    min=UINT8_MIN,
+    max=UINT8_MAX,
+}
+local PLAYER = {
+    name="player",
+    type="enum",
+    options=PLAYERS,
+}
+local TIME = {
+    name="time",
+    type="number",
+    min=UINT32_MIN,
+    max=UNIT32_MAX,
+}
+local MOVES = {
+    name="moves",
+    type="enum",
+    options=KEYS,
+    variadic=true,
+}
+
+
 local schema = {
     {
-        name="join",
-        description="Client submission to join game.",
+        -- Client submission to create game.
+        name="create",
         implemented_by="server",
-        authenticated=false,  -- no signature required on this message (default true)
-        arguments={
-            {
-                name="public_key",
-                description="Client public key to be used by the server to authenticate subsequent messages.",
-                type="bit256",
-            },
-        },
-        returns={
-            {
-                name="seed",
-                description="Game seed to drive clients deterministic simulation.",
-                type="uint16",
-            },
-            {
-                name="player",
-                description="Assign player number for client.",
-                type=PLAYERS,
-            },
-            {
-                name="public_key",
-                description="Server public key to be used by the client to authenticate subsequent messages.",
-                type="bit256",
-            },
-        }
+        arguments={},
+        returns={ROOM_ID, SEED, PLAYER},
     },
     {
-        name="insert_tick",
-        description="Client submission for their inputs for simulation tick.",
+        -- Client submission to join game.
+        name="join",
         implemented_by="server",
-        arguments={
-            {
-                name="time",
-                type="uint22",  -- (2^22)/60/60/60 == 19.42 hours max  (maybe should wrap a lower bit number instead?)
-            },
-            {
-                name="moves",
-                type="enum",
-                options=KEYS,
-                variadic=true,
-            },
-        },
+        arguments={ROOM_ID},
+        returns={SEED, PLAYER},
+    },
+    {
+        -- Client submission for their inputs for simulation tick.
+        name="insert_tick",
+        implemented_by="server",
+        arguments={TIME, MOVES},
         returns={},
     },
     {
+        -- Server broadcast for their inputs for simulation tick.
         name="insert_tick",
-        description="Server broadcast for their inputs for simulation tick.",
         implemented_by="client",
-        arguments={
-            {
-                name="time",
-                type="uint22",  -- (2^22)/60/60/60 == 19.42 hours max  (maybe should wrap a lower bit number instead?)
-            },
-            {
-                name="player",
-                type="enum",
-                options=PLAYERS,
-            },
-            {
-                name="moves",
-                type="enum",
-                options=KEYS,
-                variadic=true,
-            },
-        },
+        arguments={TIME, PLAYER, MOVES},
         returns={},
     }
 }
@@ -84,12 +77,39 @@ local function is_variadic(item)
 end
 
 
+local function validate_argument(path, argument)
+    assert(not utils.isarray(argument), path.." must be an table, not array.")
+
+    local provided = utils.keys(argument)
+    local required = {"name", "type"}
+    local defaults = {}
+
+    if argument["type"] == "number" then
+        utils.extend(required, {"min", "max"})
+    elseif argument["type"] == "enum" then
+        utils.extend(required, {"options"})
+    else
+        assert(false, "unknown type: "..argument["type"])
+    end
+
+    local optional = utils.keys(defaults)
+    local missing = utils.difference(required, provided)
+    local unknown = utils.difference(provided, utils.union(required, optional))
+
+    assert(#missing == 0, path.." has missing keys: "..table.concat(missing, ", "))
+    assert(#unknown == 0, path.." has unknown keys: "..table.concat(unknown, ", "))
+
+    -- apply defaults
+    argument = utils.merge(argument, defaults)
+end
+
+
 local function validate_action(path, action)
     assert(not utils.isarray(action), path.." must be an table, not array.")
 
     local provided = utils.keys(action)
     local required = {"name", "implemented_by"}
-    local defaults = {description="", authenticated=true, arguments={}, returns={}}
+    local defaults = {description="", arguments={}, returns={}}
     local optional = utils.keys(defaults)
 
     local missing = utils.difference(required, provided)
@@ -99,11 +119,7 @@ local function validate_action(path, action)
     assert(#unknown == 0, path.." has unknown keys: "..table.concat(unknown, ", "))
 
     -- apply defaults
-    for key, default in pairs(defaults) do
-        if action[key] == nil then
-            action[key] = default
-        end
-    end
+    action = utils.merge(action, defaults)
 
     assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'.")
     assert(utils.isarray(action["arguments"]), path..".arguments must be array, not table; deterministic order is important for optimising packet size.")
