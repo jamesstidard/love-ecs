@@ -95,8 +95,8 @@ local function validate_action(path, action)
     local missing = utils.difference(required, provided)
     local unknown = utils.difference(provided, utils.union(required, optional))
 
-    assert(#missing > 0, path.." has missing keys: "..table.concat(missing, ", "))
-    assert(#unknown > 0, path.." has unknown keys: "..table.concat(unknown, ", "))
+    assert(#missing == 0, path.." has missing keys: "..table.concat(missing, ", "))
+    assert(#unknown == 0, path.." has unknown keys: "..table.concat(unknown, ", "))
 
     -- apply defaults
     for key, default in pairs(defaults) do

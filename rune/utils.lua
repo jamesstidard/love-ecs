@@ -184,11 +184,11 @@ function Public.union(a, b)
     -- i.e. set(a) | set(b)
     local values = {}
     for _, value in ipairs(a) do
-        table.insert(value)
+        table.insert(values, value)
     end
     for _, value in ipairs(b) do
         if not Public.contains(value, values) then
-            table.insert(value)
+            table.insert(values, value)
         end
     end
     return values
@@ -201,7 +201,7 @@ function Public.difference(a, b)
     local values = {}
     for _, value in ipairs(a) do
         if not Public.contains(value, b) then
-            table.insert(value)
+            table.insert(values, value)
         end
     end
     return values
