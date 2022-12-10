@@ -63,8 +63,8 @@ local API = {
     },
 }
 
+local server = netcode.Server("*", 53474, API)
 local client = netcode.Client("127.0.0.1", 53474, API)
-client:connect()
 
 
 print(client)

@@ -117,9 +117,9 @@ function Public.Client(host, port, api)
 end
 
 
-function Public.Server(api)
+function Public.Server(host, port, api)
     local udp = socket.udp()
-    udp:setsockname("*", 53474)
+    udp:setsockname(host, port)
     udp:settimeout(0)
 
     api = Private.validate_api(api)
