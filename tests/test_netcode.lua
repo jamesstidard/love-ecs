@@ -109,7 +109,7 @@ local function validate_action(path, action)
 
     local provided = utils.keys(action)
     local required = {"name", "implemented_by"}
-    local defaults = {description="", arguments={}, returns={}}
+    local defaults = {arguments={}, returns={}}
     local optional = utils.keys(defaults)
 
     local missing = utils.difference(required, provided)
@@ -133,7 +133,7 @@ local function validate_action(path, action)
     assert(#variadics == 0 or is_variadic(action["arguments"][-1]), path.." variadic argument must be last.")
 
     for index, return_ in ipairs(action["returns"]) do
-        validate_return(path..".returns."..index, return_)
+        validate_argument(path..".returns."..index, return_)
     end
     variadics = utils.filter(action["returns"], is_variadic)
     assert(#variadics <= 1, path..".returns can only have single variadic return.")

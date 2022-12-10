@@ -11,7 +11,7 @@ end
 function Public.merge(...)
     -- merges tables, farthest right take presidence
     local out = {}
-    for _, table in ipairs(...) do
+    for _, table in ipairs(arg) do
         for key, value in pairs(table) do
             out[key] = value
         end
