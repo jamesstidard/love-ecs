@@ -5,3 +5,4 @@
 - [ ] Networking
 - [ ] hooks for developer to register to things like 'on_entity_add' etc. Maybe can be a system using `world.add_system(entity_added_handler, "entity_added")`
 - [ ] Maybe remove baked in Parent component, with the use of the above hooks, should be possible for user to recreate without special treatment
+- [ ] networked game idea. 2D top-down ricochet. WASD move, SPACE dive roll (dodge), click-hold throw and curve frisbee. hit others for points. must collect frisbee to throw again. 
