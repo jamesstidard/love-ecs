@@ -55,21 +55,13 @@ local schema = {
         returns={SEED, PLAYER},
     },
     {
-        -- Client submission for their inputs for simulation tick.
+        -- Client/Server submission/assertions for inputs for simulation tick.
         name="insert_tick",
-        implemented_by="server",
-        arguments={TIME, MOVES},
-        returns={},
-    },
-    {
-        -- Server broadcast for their inputs for simulation tick.
-        name="insert_tick",
-        implemented_by="client",
+        implemented_by={"server", "client"},
         arguments={TIME, PLAYER, MOVES},
         returns={},
-    }
+    },
 }
-
 
 
 local function is_variadic(item)
@@ -121,6 +113,11 @@ local function validate_action(path, action)
     -- apply defaults
     action = utils.merge(action, defaults)
 
+    -- normalise implemented_by
+    if type(action["implemented_by"]) == "string" then
+        action["implemented_by"] = {action["implemented_by"]}
+    end
+
     assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'.")
     assert(utils.isarray(action["arguments"]), path..".arguments must be array, not table; deterministic order is important for optimising packet size.")
     assert(utils.isarray(action["returns"]), path..".returns must be array, not table; deterministic order is important for optimising packet size.")
@@ -143,9 +140,19 @@ end
 
 local function validate_schema(schema)
     assert(utils.isarray(schema), "schema must be an array, not table; deterministic order is important for optimising packet size.")
+
+    local implements = {server={}, client={}}
     for index, action in ipairs(schema) do
-        validate_action("schema."..index, action)
+        local path = "schema"..index
+        validate_action(path, action)
+
+        -- assert no name collisions on implementor
+        for _, peer in ipairs(action["implemented_by"]) do
+            assert(not utils.contains(action["name"], implements[peer]), path..".name "..action["name"].." already implemented by "..peer)
+            table.insert(implements[peer], action["name"])
+        end
     end
+
 end
 
 validate_schema(schema)
