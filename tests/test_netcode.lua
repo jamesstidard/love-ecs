@@ -45,14 +45,14 @@ local schema = {
         name="create",
         implemented_by="server",
         arguments={},
-        returns={ROOM_ID, SEED, PLAYER},
+        returns={ROOM_ID, SEED, TIME, PLAYER},
     },
     {
         -- Client submission to join game.
         name="join",
         implemented_by="server",
         arguments={ROOM_ID},
-        returns={SEED, PLAYER},
+        returns={SEED, TIME, PLAYER},
     },
     {
         -- Client/Server submission/assertions for inputs for simulation tick.
