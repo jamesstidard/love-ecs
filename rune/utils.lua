@@ -220,4 +220,14 @@ function Public.difference(a, b)
 end
 
 
+function Public.issubset(subset, superset)
+    for _, value in ipairs(subset) do
+        if not Public.contains(value, superset) then
+            return false
+        end
+    end
+    return true
+end
+
+
 return Public

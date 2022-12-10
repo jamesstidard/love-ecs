@@ -93,6 +93,8 @@ local function validate_argument(path, argument)
 
     -- apply defaults
     argument = utils.merge(argument, defaults)
+
+    return argument
 end
 
 
@@ -118,23 +120,27 @@ local function validate_action(path, action)
         action["implemented_by"] = {action["implemented_by"]}
     end
 
-    assert(utils.contains(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' or 'server'.")
+    assert(utils.issubset(action["implemented_by"], {"client", "server"}), path..".implemented_by must be 'client' and/or 'server'.")
     assert(utils.isarray(action["arguments"]), path..".arguments must be array, not table; deterministic order is important for optimising packet size.")
     assert(utils.isarray(action["returns"]), path..".returns must be array, not table; deterministic order is important for optimising packet size.")
 
     for index, argument in ipairs(action["arguments"]) do
-        validate_argument(path..".arguments."..index, argument)
+        argument = validate_argument(path..".arguments."..index, argument)
+        action["arguments"][index] = argument
     end
     local variadics = utils.filter(action["arguments"], is_variadic)
     assert(#variadics <= 1, path..".arguments can only have single variadic argument.")
     assert(#variadics == 0 or is_variadic(action["arguments"][-1]), path.." variadic argument must be last.")
 
     for index, return_ in ipairs(action["returns"]) do
-        validate_argument(path..".returns."..index, return_)
+        return_ = validate_argument(path..".returns."..index, return_)
+        action["returns"][index] = return_
     end
     variadics = utils.filter(action["returns"], is_variadic)
     assert(#variadics <= 1, path..".returns can only have single variadic return.")
     assert(#variadics == 0 or is_variadic(action["returns"][-1]), path.." variadic return must be last.")
+
+    return action
 end
 
 
@@ -144,13 +150,15 @@ local function validate_schema(schema)
     local implements = {server={}, client={}}
     for index, action in ipairs(schema) do
         local path = "schema"..index
-        validate_action(path, action)
+        action = validate_action(path, action)
 
         -- assert no name collisions on implementor
         for _, peer in ipairs(action["implemented_by"]) do
             assert(not utils.contains(action["name"], implements[peer]), path..".name "..action["name"].." already implemented by "..peer)
             table.insert(implements[peer], action["name"])
         end
+
+        schema[index] = action  -- update with any changes. feels pretty yikes.
     end
 
 end
