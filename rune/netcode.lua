@@ -69,15 +69,15 @@ function Private.validate_action(path, action)
         argument = Private.validate_argument(path..".arguments."..index, argument)
         action["arguments"][index] = argument
     end
-    local variadics = utils.filter(action["arguments"], is_variadic)
+    local variadics = utils.filter(action["arguments"], Private.is_variadic)
     assert(#variadics <= 1, path..".arguments can only have single variadic argument.")
-    assert(#variadics == 0 or is_variadic(action["arguments"][-1]), path.." variadic argument must be last.")
+    assert(#variadics == 0 or Private.is_variadic(action["arguments"][-1]), path.." variadic argument must be last.")
 
     for index, return_ in ipairs(action["returns"]) do
         return_ = Private.validate_argument(path..".returns."..index, return_)
         action["returns"][index] = return_
     end
-    variadics = utils.filter(action["returns"], is_variadic)
+    variadics = utils.filter(action["returns"], Private.is_variadic)
     assert(#variadics <= 1, path..".returns can only have single variadic return.")
     assert(#variadics == 0 or Private.is_variadic(action["returns"][-1]), path.." variadic return must be last.")
 
