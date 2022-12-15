@@ -15,14 +15,10 @@ function Private.validate_argument(path, argument)
 
     local provided = utils.keys(argument)
     local required = {"name", "type"}
-    local defaults = {}
+    local defaults = {variadic=false}
 
-    if argument["type"] == "number" then
-        utils.extend(required, {"min", "max"})
-    elseif argument["type"] == "enum" then
+    if argument["type"] == "enum" then
         utils.extend(required, {"options"})
-    else
-        assert(false, "unknown type: "..argument["type"])
     end
 
     local optional = utils.keys(defaults)
@@ -33,7 +29,7 @@ function Private.validate_argument(path, argument)
     assert(#unknown == 0, path.." has unknown keys: "..table.concat(unknown, ", "))
 
     -- apply defaults
-    argument = utils.merge(argument, defaults)
+    argument = utils.merge(defaults, argument)
 
     return argument
 end
@@ -54,7 +50,7 @@ function Private.validate_action(path, action)
     assert(#unknown == 0, path.." has unknown keys: "..table.concat(unknown, ", "))
 
     -- apply defaults
-    action = utils.merge(action, defaults)
+    action = utils.merge(defaults, action)
 
     -- normalise implemented_by
     if type(action["implemented_by"]) == "string" then
@@ -106,12 +102,72 @@ function Private.validate_api(api)
 end
 
 
+local REQUEST_ID = {
+    name="request_id",
+    type="uint32",
+}
+local SIGNITURE = {
+    name="signiture",
+    type="uint32",
+}
+
+
+function Private.enum_format(argument)
+    for bits, fmt in pairs({[8]="B", [16]="H", [32]="I", [64]="L"}) do
+        if #argument["options"] < (2^bits - 1) then
+            return fmt
+        end
+    end
+    assert(false, "too many choices for enum")
+end
+
+
+local TYPE_FORMAT = {
+    int8="b",
+    int16="h",
+    int32="i",
+    int64="l",
+    uint8="B",
+    uint16="H",
+    uint32="I",
+    uint64="L",
+    float="f",
+    enum=Private.enum_format,
+}
+
+
+function Private.argument_format(argument)
+    local format = TYPE_FORMAT[argument["type"]]
+    if type(format) == "function" then
+        format = format(argument)
+    end
+    return format
+end
+
+
 function Public.Client(host, port, api)
     local udp = socket.udp()
     udp:setpeername(host, port)
     udp:settimeout(0)
 
     api = Private.validate_api(api)
+
+    local send = {}
+    for _, action in ipairs(api) do
+        for _, argument in ipairs(action["arguments"]) do
+            argument["format"] = Private.argument_format(argument)
+        end
+        for _, return_ in ipairs(action["returns"]) do
+            return_["format"] = Private.argument_format(return_)
+        end
+        -- <request id>
+        -- <highest consecutive response id>
+        -- <action id>
+        -- <arguments...>
+        -- <nonce>
+        -- <signature>
+        send[action["name"]] = nil
+    end
 
     return {udp=udp, api=api}
 end

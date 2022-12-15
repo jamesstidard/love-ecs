@@ -1,30 +1,20 @@
 local netcode = require("rune.netcode")
 
-local UINT8_MIN = 0
-local UINT8_MAX = 2^8 - 1
-local UINT32_MIN = 0
-local UNIT32_MAX = 2^32 - 1
 local KEYS = {"W_DOWN", "W_UP", "A_DOWN", "A_UP", "S_DOWN", "S_UP", "D_DOWN", "D_UP"}
 local PLAYERS = {1, 2, 3, 4, 5, 6, 7, 8}
 
 
 local ROOM_ID = {
     name="room_id",
-    type="number",
-    min=UINT8_MIN,
-    max=UINT8_MAX,
+    type="uint8",
 }
 local SEED = {
     name="seed",
-    type="number",
-    min=UINT8_MIN,
-    max=UINT8_MAX,
+    type="uint8",
 }
 local TIME = {
     name="time",
-    type="number",
-    min=UINT32_MIN,
-    max=UNIT32_MAX,
+    type="uint32",
 }
 local PLAYER = {
     name="player",
