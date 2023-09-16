@@ -26,5 +26,5 @@ jobs:
           npm install --global yarn
           yarn install
           yarn docs:build
-          rm -r /home/james/Development/www/public/rune/*
-          cp docs/.vuepress/dist/ /home/james/Development/www/public/rune/
+          rm -rf /home/james/Development/www/public/rune/*
+          cp -r docs/.vuepress/dist/* /home/james/Development/www/public/rune
