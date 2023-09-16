@@ -8,6 +8,8 @@ on:
       - package-lock.json
       - .github/workflows/docs.yml
       - tests/test_quick_start.lua
+  # Manual dispatch
+  workflow_dispatch:
 jobs:
   Build-And-Deploy:
     runs-on: [self-hosted, Linux, ARM64]
@@ -24,4 +26,5 @@ jobs:
           npm install --global yarn
           yarn install
           yarn docs:build
-          rsync --progress --archive --compress --delete docs/.vuepress/dist/ /home/james/Development/www/public/rune
+          rm -r /home/james/Development/www/public/rune/*
+          cp docs/.vuepress/dist/ /home/james/Development/www/public/rune/
