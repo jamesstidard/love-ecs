@@ -59,10 +59,11 @@ function Casting.run(world, entities, dt)
             Color(0, 255, 0),
             Speed(250),
             TTL(5),
+            Damage(4),
         }
 
-        if weapon.team ~= nil then
-            table.insert(projectile, Team(weapon.team.number))
+        if caster.team ~= nil then
+            table.insert(projectile, Team(caster.team.number))
         end
 
         world.add_entity(projectile)

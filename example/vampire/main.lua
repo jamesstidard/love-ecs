@@ -42,7 +42,8 @@ function love.load()
         Position(world.ctx.window.width/2, world.ctx.window.height/2),
         Speed(150),
         Control(),
-        Team(1)
+        Team(1),
+        HP(100),
     }
     local player_uid = world.add_entity(player_entity)
 
@@ -50,7 +51,6 @@ function love.load()
     local weapon_entity = {
         Parent(player_uid),
         Spell(0.5),
-        Team(1)
     }
     world.add_entity(weapon_entity)
 

@@ -5,8 +5,9 @@ local utils = require("example.vampire.utils")
 Lifetimes = {}
 
 
-Lifetimes.filter = ecs.And{
-    "ttl",
+Lifetimes.filter = {
+    ttl=ecs.And{"ttl"},
+    hp=ecs.And{"hp"},
 }
 
 
@@ -21,10 +22,20 @@ end
 
 
 function Lifetimes.run(world, entities, dt)
-    for _, entity in pairs(entities) do
+    for _, entity in pairs(entities.ttl) do
         entity.ttl.dt = entity.ttl.dt - dt
 
         if entity.ttl.dt > 0 then
+            goto continue
+        end
+
+        recursive_remove(world, entity)
+
+        ::continue::
+    end
+
+    for _, entity in pairs(entities.hp) do
+        if entity.hp.value > 0 then
             goto continue
         end
 

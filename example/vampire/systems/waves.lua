@@ -31,6 +31,8 @@ function Waves.run(world, entities, dt)
                     Speed(100),
                     Target(eid),
                     Team(2),
+                    HP(10),
+                    Damage(10),
                 })
             end
         end

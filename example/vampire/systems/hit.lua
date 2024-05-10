@@ -7,11 +7,11 @@ Hit = {}
 
 Hit.filter = {
     -- homing missles, have a single target they can hit
-    homing_missles=ecs.And{"target", "position"},
+    homing_missles=ecs.And{"target", "position", "damage"},
     -- will hit pretty much anything
-    missiles=ecs.And{"position", "hitbox", ecs.Optional("team")},
+    missiles=ecs.And{"position", "hitbox", "damage", ecs.Optional("team")},
     -- potential targets
-    targets=ecs.And{"position", "hitbox", ecs.Optional("team")}
+    targets=ecs.And{"position", "hitbox", "hp", ecs.Optional("team")}
 }
 
 
@@ -26,10 +26,10 @@ function Hit.run(world, entities, dt)
             goto continue
         end
 
-        -- collided, remove self and target
+        -- collided, remove self and damage target
         if utils.is_colliding(world, entity, target) then
-            world.remove_entity(entity.target)
             world.remove_entity(entity)
+            target.hp.value = target.hp.value - entity.damage.value
         end
 
         ::continue::
@@ -53,7 +53,7 @@ function Hit.run(world, entities, dt)
             -- collided, remove self and target
             if utils.is_colliding(world, missile, target) then
                 world.remove_entity(missile)
-                world.remove_entity(target)
+                target.hp.value = target.hp.value - missile.damage.value
             end
 
             ::continue::
