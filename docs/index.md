@@ -97,18 +97,18 @@ Instance properties of a `ecs.World()`.
 
 property                               | description
 -------------------------------------- | ---
-`world.ctx`                                  | A context property to store your arbitrary data outside the scope of your entity components; so it can be accessed in your Systems, for example. I've used it to hold on to sprite sheets in the past.
-`world.add_system(system, on)`               | Adds the system to the world. `on` ("update" or "draw") determines when the `System.run` function is called. System is added for the next tick. Returns the system `uid`.
-`world.remove_system(uid)`                   | Removes the system from the world. Takes effect on next tick.
-`world.add_entity(entity)`                   | Adds the entity to the world. Takes effect on next tick. Returns the entities `uid`.
-`world.add_entities(entities)`               | Convenience for adding multiple entities to the world at once. Takes effect on next tick. Returns a list of entity `uids` in the same order as passed list.
-`world.remove_entity(uid)`                   | Removes the entity from the world. Takes effect on next tick.
-`world.add_component(entity_uid, component)` | Adds a component to an existing entity. Takes effect on next tick.
-`world.entities`                             | All entities in the world, keyed by their entity uid. Treat as read-only, use `add_entity` to add new entities.
-`world.systems`                             | All systems in the world, keyed by their system uid. Treat as read-only, use `add_system` to add new systems.
-`world.children(entity_uid)`                 | A list of their immediate children. Add a parent-child relationship by adding a `ecs.Components.Parent` to your entity.
-`world:update(dt)`                           | Progress the simulation by the given delta time value. Indirectly calls all registered "update" Systems.
-`world:draw()`                               | Indirectly calls all "draw" registered Systems that _do not_ progress the simulation, but _are_ responsible for rendering.
+`world.ctx`                                     | A context property to store your arbitrary data outside the scope of your entity components; so it can be accessed in your Systems, for example. I've used it to hold on to sprite sheets in the past.
+`world.add_system(system, on)`                  | Adds the system to the world. `on` ("update" or "draw") determines when the `System.run` function is called. System is added for the next tick. Returns the system `uid`.
+`world.remove_system(system_or_uid)`            | Removes the system from the world. Takes effect on next tick.
+`world.add_entity(entity)`                      | Adds the entity to the world. Takes effect on next tick. Returns the entities `uid`.
+`world.add_entities(entities)`                  | Convenience for adding multiple entities to the world at once. Takes effect on next tick. Returns a list of entity `uids` in the same order as passed list.
+`world.remove_entity(entity_or_uid)`            | Removes the entity from the world. Takes effect on next tick.
+`world.add_component(entity_or_uid, component)` | Adds a component to an existing entity. Takes effect on next tick.
+`world.entities`                                | All entities in the world, keyed by their entity uid. Treat as read-only, use `add_entity` to add new entities.
+`world.systems`                                 | All systems in the world, keyed by their system uid. Treat as read-only, use `add_system` to add new systems.
+`world.children(entity_or_uid)`                 | A list of their immediate children. Add a parent-child relationship by adding a `ecs.Components.Parent` to your entity.
+`world:update(dt)`                              | Progress the simulation by the given delta time value. Indirectly calls all registered "update" Systems.
+`world:draw()`                                  | Indirectly calls all "draw" registered Systems that _do not_ progress the simulation, but _are_ responsible for rendering.
 
 ### System Filters
 A bit more documentation on the options you have defining your `System.filter`
@@ -335,5 +335,6 @@ If you have `love` installed the project can be run from the
 root directory with:
 
 ```bash
-$ love example
+$ love example/simple
+$ love example/vampire
 ```

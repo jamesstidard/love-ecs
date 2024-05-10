@@ -11,12 +11,52 @@ function Public.contains(value, table)
 end
 
 
+function Public.keys(list)
+    local arr = {}
+    for k, _ in pairs(list) do
+        table.insert(arr, k)
+    end
+    return arr
+end
+
+
 function Public.values(list)
     local arr = {}
     for _, v in pairs(list) do
         table.insert(arr, v)
     end
     return arr
+end
+
+
+function Public.empty(list)
+    return next(list) == nil
+end
+
+
+function Public.map(list, fn)
+    local arr = {}
+    for k, v in pairs(list) do
+        arr[k] = fn(v)
+    end
+    return arr
+end
+
+
+function Public.find(list, fn_or_value)
+    local fn = nil
+
+    if type(fn_or_value) == 'function' then
+        fn = fn_or_value
+    else
+        fn = function (i) return i == fn_or_value end
+    end
+
+    for k, v in pairs(list) do
+        if fn(v) then
+            return k
+        end
+    end
 end
 
 
@@ -42,6 +82,15 @@ function Public.deepcopy(original)
         copy = original
     end
     return copy
+end
+
+
+function Public.distance_between(position_1, position_b)
+    local x1 = position_1.x
+    local y1 = position_1.y
+    local x2 = position_b.x
+    local y2 = position_b.y
+    return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
 end
 
 
@@ -119,7 +168,7 @@ end
 
 
 function Public.is_colliding(world, entity_a, entity_b)
-    if entity_a.hitbox.shape == "rectangle" and entity_b.hitbox.shape == "rectange" then
+    if entity_a.hitbox.shape == "rectangle" and entity_b.hitbox.shape == "rectangle" then
         return is_colliding_rects(world, entity_a, entity_b)
     elseif entity_a.hitbox.shape == "circle" and entity_b.hitbox.shape == "circle" then
         return is_colliding_circles(world, entity_a, entity_b)

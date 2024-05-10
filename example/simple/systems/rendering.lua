@@ -1,5 +1,5 @@
 local ecs = require("rune.ecs")
-local utils = require("example.utils")
+local utils = require("example.simple.utils")
 
 
 Rendering = {}

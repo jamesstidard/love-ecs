@@ -119,7 +119,11 @@ function Public.World()
         return uid
     end
 
-    local function remove_system(uid)
+    local function remove_system(system_or_uid)
+        local uid = system_or_uid
+        if type(system_or_uid) == "table" then
+            uid = system_or_uid.uid
+        end
         table.insert(promised_changes, utils.prime(utils.keydelete, {systems, uid}))
         for _, type_systems in pairs(type_system) do
             table.insert(promised_changes, utils.prime(table.remove, {type_systems, uid}))
@@ -128,7 +132,7 @@ function Public.World()
 
     local function add_entity(entity)
         local uid = next_uid()
-        local _entity = {}
+        local _entity = {uid=uid}
         for _, component in pairs(entity) do
             _entity[component.name] = component
         end
@@ -145,20 +149,37 @@ function Public.World()
         return uids
     end
 
-    local function remove_entity(uid)
+    local function remove_entity(entity_or_uid)
+        local uid = entity_or_uid
+        if type(entity_or_uid) == "table" then
+            uid = entity_or_uid.uid
+        end
         table.insert(promised_changes, utils.prime(utils.keydelete, {entities, uid}))
     end
 
-    local function add_component(entity_uid, component)
-        local entity = entities[entity_uid]
+    local function add_component(entity_or_uid, component)
+        -- TODO:
+        -- do entities loojup inside function wrapper to handle case where
+        -- add_component is used on same tick as the entity was added.
+        local entity = entity_or_uid
+        if type(entity_or_uid) ~= "table" then
+            local uid = entity_or_uid
+            entity = entities[uid]
+        end
         table.insert(promised_changes, utils.prime(utils.keyinsert, {entity, component.name, component}))
     end
 
-    local function children(uid)
+    local function children(entity_or_uid)
+        local uid = entity_or_uid
+        if type(entity_or_uid) == "table" then
+            uid = entity_or_uid.uid
+        end
+
         local _children = {}
         for _, cuid in pairs(_entity_children[uid]) do
             _children[cuid] = entities[cuid]
         end
+
         return _children
     end
 
